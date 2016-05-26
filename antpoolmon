@@ -115,6 +115,35 @@ try:
         hrate['data']['dupelicate'],
         hrate['data']['other']))
 
+    """ Get PPLNS details """
+
+    print("\n\n{0:19} {1:>15} {2:>15} {3:>15} {4:>15}".format(
+        "Timestamp", "Height", "diff1 Sh. Cnt", "Type", "Amount"))
+    print("-" * 83)
+
+    pplns = requests.post(
+        "https://antpool.com/api/paymentHistory.htm",
+        data={
+            'key': key,
+            'nonce': str(nonce),
+            'signature': signature,
+            'type': 'pplns',
+            'pageEnable': 1,
+            'page': 1,
+            'pageSize': 5
+            }
+        ).json()
+
+    for p in pplns['data']['rows']:
+        print("{0:19} {1:>15,} {2:>15,} {3:>15} {4:>15}".format(
+            p['timestamp'],
+            int(p['blockHeight']),
+            int(p['diff1ShareCount']),
+            p['type'],
+            p['amount']))
+
+    print()
+
 
 except OSError as ex:
     print("Error: {}".format(ex), file=sys.stderr)
