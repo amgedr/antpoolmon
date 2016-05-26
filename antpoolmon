@@ -1,0 +1,64 @@
+#!/usr/bin/env python3
+
+import requests
+import hmac
+import hashlib
+import sys
+import yaml
+from os.path import expanduser
+
+try:
+    nonce = 110
+
+    with open(expanduser("~") + "/.antpoolmon.conf", "r") as cfile:
+        cnf = yaml.load(cfile)
+        username = cnf['username']
+        key = cnf['key']
+        secret = cnf['secret']
+
+    message = bytearray(username + key + str(nonce), 'utf-8')
+    signature = hmac.new(
+        bytearray(secret, 'utf-8'),
+        msg=message,
+        digestmod=hashlib.sha256).hexdigest().upper()
+
+    req = requests.post(
+        "https://antpool.com/api/poolStats.htm",
+        data={'key': key, 'nonce': str(nonce), 'signature': signature})
+
+    resp = req.json()
+
+    b_minutes, b_seconds = divmod(int(resp['data']['estimateTime']), 60)
+    b_hours, b_minutes = divmod(b_minutes, 60)
+
+    r_minutes, r_seconds = divmod(int(resp['data']['currentRound']), 60)
+    r_hours, r_minutes = divmod(r_minutes, 60)
+
+    print("\nPool Status       : {}".format(resp['data']['poolStatus']))
+    print(
+        "Pool Hashrate     : {:.2f} Ph/s".format(
+            float(resp['data']['poolHashrate']) / 1000000000))
+    print(
+        "Network Difficulty: {:,}".format(float(resp['data']['networkDiff'])))
+    print(
+        "Active Workers    : {:,}".format(
+            int(resp['data']['activeWorkerNumber'])))
+    print("Block Estimate    : {}:{}:{}".format(b_hours, b_minutes, b_seconds))
+    print("Current Round     : {}:{}:{}".format(r_hours, r_minutes, r_seconds))
+    print(
+        "Total Shares      : {:,}".format(
+            int(resp['data']['totalShareNumber'])))
+    print(
+        "Total Blocks      : {:,}\n\n".format(
+            int(resp['data']['totalBlockNumber'])))
+
+
+except OSError as ex:
+    print("Error: {}".format(ex), file=sys.stderr)
+    sys.exit(1)
+
+except yaml.YAMLError:
+    print("Please make sure the file .antpoolmon.conf exists in your home ")
+    print("directory and contains the following the following:")
+    print('username: "<username>"\nkey: "<key>"\nsecret: "<secret>"\n')
+    sys.exit(2)
