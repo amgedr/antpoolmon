@@ -94,6 +94,27 @@ try:
             w['dupelicate'],
             w['other']))
 
+    """ Get total hashrate """
+
+    hrate = requests.post(
+        "https://antpool.com/api/hashrate.htm",
+        data={'key': key, 'nonce': str(nonce), 'signature': signature}).json()
+
+    print("{}{}".format(" " * 23, "-" * 77))
+
+    print("{0:>30.2f} {1:>9.2f} {2:>9.2f} {3:>9.2f}".format(
+        float(hrate['data']['last10m']) / 1000,
+        float(hrate['data']['last30m']) / 1000,
+        float(hrate['data']['last1h']) / 1000,
+        float(hrate['data']['last1d']) / 1000,
+        ), end="")
+
+    print(" {0:>9} {1:>9} {2:>9} {3:>9}".format(
+        hrate['data']['accepted'],
+        hrate['data']['stale'],
+        hrate['data']['dupelicate'],
+        hrate['data']['other']))
+
 
 except OSError as ex:
     print("Error: {}".format(ex), file=sys.stderr)
