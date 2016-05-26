@@ -67,6 +67,33 @@ try:
             acc['data']['paidOut'],
             acc['data']['balance']))
 
+    """ Get hashrate by workers """
+
+    print("\n\n{0:20} {1:>9} {2:>9} {3:>9} ".format(
+        "Workers", "Last 10M", "Last 30M", "Last 1H"), end="")
+    print("{0:>9} {1:>9} {2:>9} {3:>9} {4:>9}".format(
+        "Last 1D", "Accepted", "Stale", "Duplicate", "Other"))
+    print("-" * 100)
+
+    workers = requests.post(
+        "https://antpool.com/api/workers.htm",
+        data={'key': key, 'nonce': str(nonce), 'signature': signature}).json()
+
+    for w in workers['data']['rows']:
+        print("{0:20} {1:>9.2f} {2:>9.2f} {3:>9.2f} {4:>9.2f}".format(
+            w['worker'],
+            float(w['last10m']) / 1000,
+            float(w['last30m']) / 1000,
+            float(w['last1h']) / 1000,
+            float(w['last1d']) / 1000,
+            ), end="")
+
+        print(" {0:>9} {1:>9} {2:>9} {3:>9}".format(
+            w['accepted'],
+            w['stale'],
+            w['dupelicate'],
+            w['other']))
+
 
 except OSError as ex:
     print("Error: {}".format(ex), file=sys.stderr)
