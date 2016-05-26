@@ -52,6 +52,21 @@ try:
         "Total Blocks      : {:,}\n\n".format(
             int(resp['data']['totalBlockNumber'])))
 
+    """ Get account details """
+
+    req = requests.post(
+        "https://antpool.com/api/account.htm",
+        data={'key': key, 'nonce': str(nonce), 'signature': signature})
+    acc = req.json()
+
+    print("Earnings:")
+
+    print("24 Hrs: {:<14} Total: {:<14} Paid Out: {:<14} Balance: {}".format(
+            acc['data']['earn24Hours'],
+            acc['data']['earnTotal'],
+            acc['data']['paidOut'],
+            acc['data']['balance']))
+
 
 except OSError as ex:
     print("Error: {}".format(ex), file=sys.stderr)
