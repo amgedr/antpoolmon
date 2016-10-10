@@ -2,7 +2,7 @@
 A command-line script for monitoring an AntPool account.
 
 ## Settings
-The script requires a configuration file in the users home directory containing the following lines:
+The script requires a YAML configuration file in the users home directory called **.antpoolmon.conf** containing the following lines:
 
 ```yaml
 username: "<username>"
