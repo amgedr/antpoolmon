@@ -4,27 +4,34 @@ import requests
 import hmac
 import hashlib
 import sys
+import time
 import yaml
 from os.path import expanduser
 
 try:
-    nonce = 110
-
     with open(expanduser("~") + "/.antpoolmon.conf", "r") as cfile:
-        cnf = yaml.load(cfile)
+        cnf = yaml.load(cfile, yaml.BaseLoader)
         username = cnf['username']
         key = cnf['key']
         secret = cnf['secret']
 
-    message = bytearray(username + key + str(nonce), 'utf-8')
+    nonce = int(time.time()*1000)
+    message = username + key + str(nonce)
     signature = hmac.new(
-        bytearray(secret, 'utf-8'),
-        msg=message,
-        digestmod=hashlib.sha256).hexdigest().upper()
+        secret.encode('utf-8'),
+        msg=message.encode('utf-8'),
+        digestmod=hashlib.sha256,
+    ).hexdigest().upper()
 
     req = requests.post(
-        "https://antpool.com/api/poolStats.htm",
-        data={'key': key, 'nonce': str(nonce), 'signature': signature})
+        'https://antpool.com/api/poolStats.htm',
+        data={
+            'key': key,
+            'nonce': nonce,
+            'signature': signature,
+            'coin': 'BTC',
+        }
+    )
 
     resp = req.json()
 
